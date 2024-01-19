@@ -5,6 +5,7 @@ import io.github.daylanbueno.authapi.models.Usuario;
 import io.github.daylanbueno.authapi.respositories.UsuarioRepository;
 import io.github.daylanbueno.authapi.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,6 +13,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public UsuarioDto salvar(UsuarioDto usuarioDto) {
@@ -22,7 +26,10 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RuntimeException("Usuário já existe!");
         }
 
-        Usuario entity = new Usuario(usuarioDto.nome(), usuarioDto.login(), usuarioDto.senha());
+
+        var passwordHash = passwordEncoder.encode(usuarioDto.senha());
+
+        Usuario entity = new Usuario(usuarioDto.nome(), usuarioDto.login(), passwordHash);
 
         Usuario novoUsuario = usuarioRepository.save(entity);
 

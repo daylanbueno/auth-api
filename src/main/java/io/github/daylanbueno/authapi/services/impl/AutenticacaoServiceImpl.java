@@ -3,6 +3,7 @@ package io.github.daylanbueno.authapi.services.impl;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import io.github.daylanbueno.authapi.dtos.AuthDto;
 import io.github.daylanbueno.authapi.models.Usuario;
 import io.github.daylanbueno.authapi.respositories.UsuarioRepository;
@@ -43,6 +44,21 @@ public class AutenticacaoServiceImpl implements AutenticacaoService {
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Erro ao tentar gerar o token! " +exception.getMessage());
+        }
+    }
+
+    public String validaTokenJwt(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256("my-secret");
+
+            return JWT.require(algorithm)
+                    .withIssuer("auth-api")
+                    .build()
+                    .verify(token)
+                    .getSubject();
+
+        } catch (JWTVerificationException exception) {
+            return "";
         }
     }
 

@@ -12,4 +12,5 @@ Let's grow together! Watch the video and level up your skills.
 - Spring security
 - Maven
 - Lombok
-  
+
+  Youbube video: https://www.youtube.com/watch?v=aN1R_ilr0qA

@@ -1,6 +1,7 @@
 package io.github.daylanbueno.authapi.services.impl;
 
 import io.github.daylanbueno.authapi.dtos.UsuarioDto;
+import io.github.daylanbueno.authapi.infra.exceptions.BusinessException;
 import io.github.daylanbueno.authapi.models.Usuario;
 import io.github.daylanbueno.authapi.respositories.UsuarioRepository;
 import io.github.daylanbueno.authapi.services.UsuarioService;
@@ -23,9 +24,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuarioJaExiste = usuarioRepository.findByLogin(usuarioDto.login());
 
         if (usuarioJaExiste != null) {
-            throw new RuntimeException("Usuário já existe!");
+            throw new BusinessException("Usuário já existe!");
         }
-
 
         var passwordHash = passwordEncoder.encode(usuarioDto.senha());
 

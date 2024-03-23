@@ -6,10 +6,14 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import io.github.daylanbueno.authapi.dtos.AuthDto;
 import io.github.daylanbueno.authapi.dtos.TokenResponseDto;
+import io.github.daylanbueno.authapi.infra.exceptions.UnauthorizedException;
 import io.github.daylanbueno.authapi.models.Usuario;
 import io.github.daylanbueno.authapi.respositories.UsuarioRepository;
 import io.github.daylanbueno.authapi.services.AutenticacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -21,9 +25,14 @@ import java.time.ZoneOffset;
 @Service
 public class AutenticacaoServiceImpl implements AutenticacaoService {
 
-    private String  secret = "my-secret";
-    private Integer expirationAcessToken = 1;
-    private Integer expirarionRefreshToken = 8;
+    @Value("${auth.jwt.token.secret-key}")
+    private  String secretKey;
+
+    @Value("${auth.jwt.token.expiration}")
+    private Integer horaExpiracaoToken = 1;
+
+    @Value("${auth.jwt.refresh-token.expiration}")
+    private Integer horaExpiracaoRefreshToken = 8;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -37,14 +46,14 @@ public class AutenticacaoServiceImpl implements AutenticacaoService {
         Usuario usuario = usuarioRepository.findByLogin(authDto.login());
         return TokenResponseDto
                 .builder()
-                .token(buildToken(usuario, expirationAcessToken))
-                .refreshToken(buildToken(usuario, expirarionRefreshToken))
+                .token(buildToken(usuario, horaExpiracaoToken))
+                .refreshToken(buildToken(usuario, horaExpiracaoRefreshToken))
                 .build();
     }
 
     public  String buildToken(Usuario usuario, Integer expiration) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256("my-secret");
+            Algorithm algorithm = Algorithm.HMAC256(secretKey);
             
             return JWT.create()
                     .withIssuer("auth-api")
@@ -56,9 +65,30 @@ public class AutenticacaoServiceImpl implements AutenticacaoService {
         }
     }
 
+    @Override
+    public TokenResponseDto obterRefreshToken(String refreshToken) {
+
+        String login = validaTokenJwt(refreshToken);
+        Usuario usuario = usuarioRepository.findByLogin(login);
+
+        if (usuario == null) {
+            throw  new UnauthorizedException("Unauthorizad");
+        }
+
+        var autentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(autentication);
+
+        return TokenResponseDto
+                .builder()
+                .token(buildToken(usuario, horaExpiracaoToken))
+                .refreshToken(buildToken(usuario, horaExpiracaoRefreshToken))
+                .build();
+    }
+
     public String validaTokenJwt(String token) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
+            Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
             return JWT.require(algorithm)
                     .withIssuer("auth-api")

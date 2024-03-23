@@ -1,6 +1,7 @@
 package io.github.daylanbueno.authapi.controllers;
 
 import io.github.daylanbueno.authapi.dtos.AuthDto;
+import io.github.daylanbueno.authapi.dtos.TokenResponseDto;
 import io.github.daylanbueno.authapi.services.AutenticacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ public class AutenticacaoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public String  auth(@RequestBody AuthDto authDto) {
+    public TokenResponseDto auth(@RequestBody AuthDto authDto) {
 
         var usuarioAutenticationToken = new UsernamePasswordAuthenticationToken(authDto.login(), authDto.senha());
 

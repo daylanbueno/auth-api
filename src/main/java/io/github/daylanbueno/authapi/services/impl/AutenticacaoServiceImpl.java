@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import io.github.daylanbueno.authapi.dtos.AuthDto;
+import io.github.daylanbueno.authapi.dtos.TokenResponseDto;
 import io.github.daylanbueno.authapi.models.Usuario;
 import io.github.daylanbueno.authapi.respositories.UsuarioRepository;
 import io.github.daylanbueno.authapi.services.AutenticacaoService;
@@ -28,9 +29,9 @@ public class AutenticacaoServiceImpl implements AutenticacaoService {
     }
 
     @Override
-    public String obterToken(AuthDto authDto) {
+    public TokenResponseDto obterToken(AuthDto authDto) {
         Usuario usuario = usuarioRepository.findByLogin(authDto.login());
-        return geraTokenJwt(usuario);
+        return new TokenResponseDto(geraTokenJwt(usuario), null) ;
     }
 
     public  String geraTokenJwt(Usuario usuario) {

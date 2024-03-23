@@ -13,4 +13,16 @@ public class ApplicationResourceAdvice {
     public ApiError handleBusinessException(BusinessException exception) {
         return new ApiError(exception.getMessage());
     }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiError handleUnauthorizedException(UnauthorizedException exception) {
+        return new ApiError(exception.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleException(RuntimeException exception) {
+        return new ApiError(exception.getMessage());
+    }
 }

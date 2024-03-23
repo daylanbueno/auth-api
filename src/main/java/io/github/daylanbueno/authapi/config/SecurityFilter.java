@@ -1,5 +1,6 @@
 package io.github.daylanbueno.authapi.config;
 
+import io.github.daylanbueno.authapi.infra.exceptions.UnauthorizedException;
 import io.github.daylanbueno.authapi.models.Usuario;
 import io.github.daylanbueno.authapi.respositories.UsuarioRepository;
 import io.github.daylanbueno.authapi.services.AutenticacaoService;
@@ -33,6 +34,10 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (token != null) {
             String login = autenticacaoService.validaTokenJwt(token);
             Usuario usuario = usuarioRepository.findByLogin(login);
+
+            if (usuario == null) {
+                throw  new UnauthorizedException("Unauthorizad");
+            }
 
             var autentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
 
